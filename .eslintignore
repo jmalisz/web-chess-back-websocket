@@ -1,0 +1,7 @@
+/coverage
+/dist
+/node_modules
+# There are problems with Tailwind plugins
+# tailwind.config.ts
+# postcss.config.cjs
+# vite-env.d.ts

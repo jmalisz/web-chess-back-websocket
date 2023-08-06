@@ -1,0 +1,30 @@
+{
+  "recommendations": [
+    // Linting
+    "christian-kohler.npm-intellisense",
+    "davidanson.vscode-markdownlint",
+    "dbaeumer.vscode-eslint",
+    "streetsidesoftware.code-spell-checker",
+    "tamasfe.even-better-toml",
+    "visualstudioexptteam.vscodeintellicode",
+    // Formating
+    "editorconfig.editorconfig",
+    "esbenp.prettier-vscode",
+    "tyriar.sort-lines",
+    // Visual information
+    "aaron-bond.better-comments",
+    "gruntfuggly.todo-tree",
+    "pflannery.vscode-versionlens",
+    "vscode-icons-team.vscode-icons",
+    "wix.vscode-import-cost",
+    // Git
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    // Remote/pair work
+    "ms-vscode-remote.remote-containers",
+    "ms-vscode-remote.remote-ssh",
+    "ms-vscode-remote.remote-wsl",
+    "ms-vscode-remote.vscode-remote-extensionpack",
+    "ms-vsliveshare.vsliveshare"
+  ]
+}
