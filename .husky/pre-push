@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# pnpm exec lint-staged
+npx lint-staged
 
-# pnpm run typecheck
+npm run typecheck
