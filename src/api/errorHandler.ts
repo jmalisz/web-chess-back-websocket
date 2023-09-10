@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
 import type { Socket } from "socket.io";
 
-import { logger } from "@/config/logger";
+import { logger } from "@/config/logger.js";
 
 export const createCallbackErrorWrapper = (socketIo: Socket) => {
   const errorHandler = (error: unknown) => {
-     
     logger.error(error);
     socketIo.disconnect(true);
   };
@@ -19,7 +18,6 @@ export const createCallbackErrorWrapper = (socketIo: Socket) => {
           ret.catch(errorHandler);
         }
       } catch (error) {
-         
         errorHandler(error);
       }
     };

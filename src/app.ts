@@ -1,25 +1,48 @@
- 
-import dotenv from "dotenv";
+import "./config/env.js";
+
 import express from "express";
+import helmet from "helmet";
+import { pinoHttp } from "pino-http";
 
-// import helmet from "helmet";
-import { createSocketIoServer } from "@/api/createSocketIoServer.server";
-
-dotenv.config();
-
-const { PORT } = process.env;
+import { createSocketIoServer } from "@/api/createSocketIoServer.server.js";
+import { logger } from "@/config/logger.js";
 
 const app = express();
 
+app.use(helmet());
 app.use(express.json());
-// app.use(
-//   helmet({
-//     crossOriginResourcePolicy: false,
-//   }),
-// );
+app.use(pinoHttp({ logger }));
+
+app.get("/", (_req, res) => {
+  res.send("OK");
+});
 
 const { httpServer } = createSocketIoServer(app);
-httpServer.listen(PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Express server is running at http://localhost:${PORT}`);
+httpServer.listen(3000, () => {
+  logger.info("Express server is running at http://localhost:3000");
+});
+
+/* eslint-disable unicorn/no-process-exit */
+const gracefulShutdown = () => {
+  httpServer.close(() => {
+    process.exit(1);
+  });
+
+  // If a graceful shutdown is not achieved after 1 second, shut down the process completely
+  setTimeout(() => {
+    // Exit immediately and generate a core dump file
+    process.abort();
+  }, 1000).unref();
+  process.exit(1);
+};
+/* eslint-enable unicorn/no-process-exit */
+
+process.on("uncaughtException", (err) => {
+  logger.fatal(err, "Uncaught exception");
+  gracefulShutdown();
+});
+
+process.on("unhandledRejection", (err) => {
+  logger.fatal(err, "Uncaught rejection");
+  gracefulShutdown();
 });

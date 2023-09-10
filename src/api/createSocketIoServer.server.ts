@@ -9,9 +9,11 @@ import type { Express } from "express";
 import { Server } from "socket.io";
 import { z } from "zod";
 
-import { createCallbackErrorWrapper } from "./errorHandler";
-import type { ChatMessage, GameData } from "./inMemoryStores.server";
-import { createGameStore, createSessionStore } from "./inMemoryStores.server";
+import { NODE_ENV } from "@/config/env.js";
+
+import { createCallbackErrorWrapper } from "./errorHandler.js";
+import type { ChatMessage, GameData } from "./inMemoryStores.server.js";
+import { createGameStore, createSessionStore } from "./inMemoryStores.server.js";
 
 declare module "socket.io" {
   interface Socket {
@@ -59,13 +61,16 @@ export function createSocketIoServer(app: Express) {
   const sessionStore = createSessionStore();
   const gameStore = createGameStore();
   const httpServer = createServer(app);
-  const socketIoServer = new Server(httpServer, {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    cors: {
-      origin: "*",
-    },
-  });
+  const socketIoServer = new Server(
+    httpServer,
+    NODE_ENV === "development"
+      ? {
+          cors: {
+            origin: "*",
+          },
+        }
+      : undefined,
+  );
 
   socketIoServer.use((socketIo, next) => {
     const { sessionId } = initialHandshakeSchema.parse(socketIo.handshake.auth);
