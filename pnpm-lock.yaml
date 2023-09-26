@@ -43,9 +43,6 @@ devDependencies:
   '@types/lodash-es':
     specifier: ^4.17.8
     version: 4.17.8
-  '@types/module-alias':
-    specifier: ^2.0.2
-    version: 2.0.2
   '@types/node':
     specifier: 20.4.7
     version: 20.4.7
@@ -746,10 +743,6 @@ packages:
 
   /@types/mime@3.0.1:
     resolution: {integrity: sha512-Y4XFY5VJAuw0FgAqPNd6NNoV44jbq9Bz2L7Rh/J6jLTiHBSBJa9fxqQIvkIld4GsoDOcCbvzOUAbLPsSKKg+uA==}
-    dev: true
-
-  /@types/module-alias@2.0.2:
-    resolution: {integrity: sha512-Oeo5NEjAceFgN8OzGiLXPswgv2GBmrDGuTnLS0sQ8g4Mq5sB5c97Hu5B+n9Gu/j+5Y+oUb4TSawHXkZ8MENGyw==}
     dev: true
 
   /@types/node@20.4.7:

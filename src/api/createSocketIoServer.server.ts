@@ -9,7 +9,7 @@ import type { Express } from "express";
 import { Server } from "socket.io";
 import { z } from "zod";
 
-import { NODE_ENV } from "@/config/env.js";
+import { SERVICE_PATH } from "@/config/env.js";
 
 import { createCallbackErrorWrapper } from "./errorHandler.js";
 import type { ChatMessage, GameData } from "./inMemoryStores.server.js";
@@ -61,16 +61,9 @@ export function createSocketIoServer(app: Express) {
   const sessionStore = createSessionStore();
   const gameStore = createGameStore();
   const httpServer = createServer(app);
-  const socketIoServer = new Server(
-    httpServer,
-    NODE_ENV === "development"
-      ? {
-          cors: {
-            origin: "*",
-          },
-        }
-      : undefined,
-  );
+  const socketIoServer = new Server(httpServer, {
+    path: `${SERVICE_PATH}/socket.io`,
+  });
 
   socketIoServer.use((socketIo, next) => {
     const { sessionId } = initialHandshakeSchema.parse(socketIo.handshake.auth);

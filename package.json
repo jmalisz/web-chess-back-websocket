@@ -19,7 +19,7 @@
     "prettify:fix": "prettier src --write",
     "typecheck": "tsc --noEmit",
     "docker:image": "docker build -t $(bin/generate_docker_tag.sh) --build-arg NODE_VERSION=$(bin/read_node_version.sh) .",
-    "docker:run": "docker run -t $(bin/generate_docker_tag.sh) -p 3000:3000 -d",
+    "docker:run": "docker run -p 3000:3000 -d --restart=always $(bin/generate_docker_tag.sh)",
     "start": "node dist/app.js"
   },
   "dependencies": {

@@ -1,4 +1,5 @@
-import "./config/env.js";
+// eslint-disable-next-line simple-import-sort/imports, import/order
+import { SERVICE_PATH } from "./config/env.js";
 
 import express from "express";
 import helmet from "helmet";
@@ -13,13 +14,13 @@ app.use(helmet());
 app.use(express.json());
 app.use(pinoHttp({ logger }));
 
-app.get("/", (_req, res) => {
+app.get(SERVICE_PATH, (_req, res) => {
   res.send("OK");
 });
 
 const { httpServer } = createSocketIoServer(app);
 httpServer.listen(3000, () => {
-  logger.info("Express server is running at http://localhost:3000");
+  logger.info("Express server is running at port 3000");
 });
 
 /* eslint-disable unicorn/no-process-exit */

@@ -24,9 +24,11 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --ignore-scripts 
 RUN pnpm run build
 
 # Prepare and cache working app
-FROM base
+FROM base AS final
 WORKDIR /app
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
+
+ENV SERVICE_PATH="/api/websocket"
 
 CMD [ "pnpm", "start" ]

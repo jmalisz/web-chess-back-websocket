@@ -1,0 +1,6 @@
+version: "3.8"
+services:
+  web-chess-back-websocket:
+    image: "jmalisz/web-chess-back-websocket"
+    ports:
+      - "3000:3000"
