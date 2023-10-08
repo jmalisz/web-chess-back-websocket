@@ -3,20 +3,27 @@ import { SERVICE_PATH } from "./config/env.js";
 
 import express from "express";
 import helmet from "helmet";
-import { pinoHttp } from "pino-http";
 
-import { createSocketIoServer } from "@/api/createSocketIoServer.server.js";
-import { logger } from "@/config/logger.js";
+import { logger, createLogMiddleware } from "./middlewares/createLogMiddleware.js";
+import { RequestError } from "./models/RequestError.js";
+import { createErrorMiddleware } from "./middlewares/createErrorMiddleware.js";
+import { createSocketIoServer } from "./websockets/createSocketIoServer.js";
 
 const app = express();
 
 app.use(helmet());
 app.use(express.json());
-app.use(pinoHttp({ logger }));
 
 app.get(SERVICE_PATH, (_req, res) => {
   res.send("OK");
 });
+
+app.all("*", () => {
+  throw new RequestError({ httpStatus: 404, code: "GENERAL", subcode: "NOT_FOUND" });
+});
+
+app.use(createLogMiddleware());
+app.use(createErrorMiddleware());
 
 const { httpServer } = createSocketIoServer(app);
 httpServer.listen(3000, () => {

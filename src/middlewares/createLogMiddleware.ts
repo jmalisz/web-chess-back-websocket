@@ -1,4 +1,5 @@
 import { pino } from "pino";
+import { pinoHttp } from "pino-http";
 
 import { LOG_LEVEL } from "@/config/env.js";
 
@@ -10,3 +11,5 @@ export const logger = pino({
   },
   timestamp: pino.stdTimeFunctions.isoTime,
 });
+
+export const createLogMiddleware = () => pinoHttp({ logger });
