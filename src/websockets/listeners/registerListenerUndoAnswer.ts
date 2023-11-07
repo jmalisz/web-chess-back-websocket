@@ -21,9 +21,9 @@ export const registerListenerUndoAnswer = ({
   chess,
   gameStore,
 }: RegisterListenerUndoAnswerProps) => {
-  socketIo.on("undoAnswer", (data) => {
+  socketIo.on("undoAnswer", async (data) => {
     const { gameId, answer } = undoAnswerSchema.parse(data);
-    const savedGameData = gameStore.findGame(gameId);
+    const savedGameData = await gameStore.findGame(gameId);
 
     if (!savedGameData) {
       throw new RequestError({
@@ -39,7 +39,7 @@ export const registerListenerUndoAnswer = ({
       chess.undo();
       const gamePositionFen = chess.fen();
 
-      gameStore.saveGame(gameId, {
+      await gameStore.saveGame(gameId, {
         ...savedGameData,
         gamePositionPgn: chess.pgn(),
         gamePositionFen,

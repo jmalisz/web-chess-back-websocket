@@ -1,7 +1,7 @@
 import { lowerCase } from "lodash-es";
 import z from "zod";
 
-const validator = z;
+export * as validator from "zod";
 
 const customErrorMap: z.ZodErrorMap = (issue, ctx) => {
   if (issue.path.length === 0) {
@@ -14,6 +14,4 @@ const customErrorMap: z.ZodErrorMap = (issue, ctx) => {
   };
 };
 
-validator.setErrorMap(customErrorMap);
-
-export { validator };
+z.setErrorMap(customErrorMap);

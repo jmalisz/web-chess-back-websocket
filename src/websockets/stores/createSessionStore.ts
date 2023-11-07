@@ -1,17 +1,20 @@
-export type SessionData = boolean;
+import { RedisClientType } from "redis";
+
+const SESSION_STORE_TTL = 24 * 60 * 60;
 
 // Private session token that shouldn't be exposed to other users
-export const createSessionStore = () => {
-  // Just check if exists in Map
-  const sessionsStore = new Map<string, SessionData>();
-
-  // Clear store every 24h to not overwhelm the server
-  // TODO: Not ideal, find better solution. Probably a db.
-  setInterval(() => sessionsStore.clear(), 24 * 60 * 60 * 1000);
-
-  const findSession = (sessionId: string) => sessionsStore.get(sessionId);
-  const saveSession = (sessionId: string) => sessionsStore.set(sessionId, true);
-  const clearSession = (sessionId: string) => sessionsStore.delete(sessionId);
+export const createSessionStore = (redisClient: RedisClientType) => {
+  const findSession = (sessionId: string) => redisClient.get(`sessionId:${sessionId}`);
+  const saveSession = async (sessionId: string) => {
+    await redisClient
+      .multi()
+      .set(`sessionId:${sessionId}`, "connected")
+      .expire(`sessionId:${sessionId}`, SESSION_STORE_TTL)
+      .exec();
+  };
+  const clearSession = async (sessionId: string) => {
+    await redisClient.del(`sessionId:${sessionId}`);
+  };
 
   return {
     findSession,

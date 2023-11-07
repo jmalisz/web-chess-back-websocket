@@ -25,7 +25,7 @@ const handleError = (socketIo: Socket, error: unknown) => {
       httpStatus: 500,
       code: "WEBSOCKET",
       subcode: "INTERNAL_SERVER_ERROR",
-      errors: [{ message: "Internal server error" }],
+      errors: [{ message: error instanceof Error ? error.message : "Internal server error" }],
     });
 
     logger.error(requestError);

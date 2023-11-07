@@ -22,9 +22,9 @@ export const registerListenerNewChatMessage = ({
 }: RegisterListenerNewChatMessageProps) => {
   const { sessionId } = socketIo;
 
-  socketIo.on("newChatMessage", (data) => {
+  socketIo.on("newChatMessage", async (data) => {
     const { gameId, newChatMessage } = newChatMessageSchema.parse(data);
-    const savedGameData = gameStore.findGame(gameId);
+    const savedGameData = await gameStore.findGame(gameId);
 
     if (!savedGameData) {
       throw new RequestError({
@@ -41,7 +41,7 @@ export const registerListenerNewChatMessage = ({
       content: newChatMessage,
     };
     savedGameData.chatMessages.push(savedNewChatMessage);
-    gameStore.saveGame(gameId, savedGameData);
+    await gameStore.saveGame(gameId, savedGameData);
 
     socketIo.to(gameId).emit("newChatMessage", {
       id: savedNewChatMessage.id,

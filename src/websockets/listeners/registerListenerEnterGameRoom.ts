@@ -12,7 +12,7 @@ type CreateNewGameProps = {
   gameId: string;
 };
 
-const createNewGame = ({ socketIo, chess, gameStore, gameId }: CreateNewGameProps) => {
+const createNewGame = async ({ socketIo, chess, gameStore, gameId }: CreateNewGameProps) => {
   const { sessionId } = socketIo;
 
   const newGameData: GameData = {
@@ -22,7 +22,7 @@ const createNewGame = ({ socketIo, chess, gameStore, gameId }: CreateNewGameProp
     chatMessages: [],
   };
 
-  gameStore.saveGame(gameId, newGameData);
+  await gameStore.saveGame(gameId, newGameData);
   socketIo.emit("enterGameRoom", pruneSessionData(sessionId, newGameData, "white"));
 };
 
@@ -53,11 +53,16 @@ type AddSecondPlayerProps = {
   gameId: string;
 };
 
-const addSecondPlayer = ({ socketIo, gameStore, savedGameData, gameId }: AddSecondPlayerProps) => {
+const addSecondPlayer = async ({
+  socketIo,
+  gameStore,
+  savedGameData,
+  gameId,
+}: AddSecondPlayerProps) => {
   const { sessionId } = socketIo;
 
   const newSavedGame = { ...savedGameData, secondSessionId: sessionId };
-  gameStore.saveGame(gameId, newSavedGame);
+  await gameStore.saveGame(gameId, newSavedGame);
 
   socketIo.emit("enterGameRoom", pruneSessionData(sessionId, newSavedGame, "black"));
   socketIo
@@ -87,7 +92,7 @@ export const registerListenerEnterGameRoom = ({
 
     await socketIo.join(gameId);
 
-    const savedGameData = gameStore.findGame(gameId);
+    const savedGameData = await gameStore.findGame(gameId);
 
     if (!savedGameData) {
       return createNewGame({ socketIo, chess, gameStore, gameId });

@@ -25,7 +25,7 @@ app.all("*", () => {
 app.use(createLogMiddleware());
 app.use(createErrorMiddleware());
 
-const { httpServer } = createSocketIoServer(app);
+const { httpServer } = await createSocketIoServer(app);
 httpServer.listen(3000, () => {
   logger.info("Express server is running at port 3000");
 });

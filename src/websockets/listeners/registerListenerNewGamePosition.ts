@@ -22,9 +22,9 @@ export const registerListenerNewGamePosition = ({
   chess,
   gameStore,
 }: RegisterListenerNewGamePositionProps) => {
-  socketIo.on("newGamePosition", (data) => {
+  socketIo.on("newGamePosition", async (data) => {
     const { gameId, from, to } = newGamePositionSchema.parse(data);
-    const savedGameData = gameStore.findGame(gameId);
+    const savedGameData = await gameStore.findGame(gameId);
 
     if (!savedGameData) {
       throw new RequestError({
@@ -52,7 +52,7 @@ export const registerListenerNewGamePosition = ({
     }
 
     const gamePositionFen = chess.fen();
-    gameStore.saveGame(gameId, {
+    await gameStore.saveGame(gameId, {
       ...savedGameData,
       gamePositionPgn: chess.pgn(),
       gamePositionFen,

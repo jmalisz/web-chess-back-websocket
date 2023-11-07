@@ -11,11 +11,11 @@ const initialHandshakeSchema = validator.object({
 
 const setupSession =
   (sessionStore: ReturnType<typeof createSessionStore>) =>
-  (socketIo: Socket, next: (err?: Error) => void) => {
+  async (socketIo: Socket, next: (err?: Error) => void) => {
     const { sessionId } = initialHandshakeSchema.parse(socketIo.handshake.auth);
 
     if (sessionId) {
-      const sessionExists = sessionStore.findSession(sessionId);
+      const sessionExists = await sessionStore.findSession(sessionId);
 
       if (sessionExists) {
         // eslint-disable-next-line no-param-reassign

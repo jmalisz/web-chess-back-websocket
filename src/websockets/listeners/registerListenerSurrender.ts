@@ -20,9 +20,9 @@ export const registerListenerSurrender = ({
   chess,
   gameStore,
 }: RegisterListenerSurrenderProps) => {
-  socketIo.on("surrender", (data) => {
+  socketIo.on("surrender", async (data) => {
     const { gameId } = surrenderSchema.parse(data);
-    const savedGameData = gameStore.findGame(gameId);
+    const savedGameData = await gameStore.findGame(gameId);
 
     if (!savedGameData) {
       throw new RequestError({
@@ -43,7 +43,7 @@ export const registerListenerSurrender = ({
 
     chess.reset();
 
-    gameStore.saveGame(gameId, {
+    await gameStore.saveGame(gameId, {
       ...savedGameData,
       gamePositionPgn: chess.pgn(),
       gamePositionFen: chess.fen(),

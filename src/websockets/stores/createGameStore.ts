@@ -1,30 +1,40 @@
-export type ChatMessage = {
-  id: string;
-  fromSessionId: string;
-  content: string;
-};
+import { RedisClientType } from "redis";
 
-export type GameData = {
-  firstSessionId: string;
-  secondSessionId?: string;
+import { validator } from "@/config/validators.js";
+
+const GAME_STORE_TTL = 24 * 60 * 60;
+
+export const chatMessageSchema = validator.object({
+  id: validator.string(),
+  fromSessionId: validator.string(),
+  content: validator.string(),
+});
+export type ChatMessage = validator.infer<typeof chatMessageSchema>;
+
+export const gameDataSchema = validator.object({
+  firstSessionId: validator.string(),
+  secondSessionId: validator.string().optional(),
   // Used for saving game history to allow undo between sessions
-  gamePositionPgn: string;
-  // TODO: Investigate if it's truly needed
+  gamePositionPgn: validator.string(),
   // Used on client
-  gamePositionFen: string;
-  chatMessages: ChatMessage[];
-};
+  gamePositionFen: validator.string(),
+  chatMessages: validator.array(chatMessageSchema),
+});
+export type GameData = validator.infer<typeof gameDataSchema>;
 
-export const createGameStore = () => {
-  const gameStore = new Map<string, GameData>();
-
-  // Clear store every 24h to not overwhelm the server
-  // TODO: Not ideal, find better solution. Probably a db.
-  setInterval(() => gameStore.clear(), 24 * 60 * 60 * 1000);
-
-  const findGame = (gameId: string) => gameStore.get(gameId);
-  const saveGame = (gameId: string, gameData: GameData) => gameStore.set(gameId, gameData);
-  const clearGame = (gameId: string) => gameStore.delete(gameId);
+export const createGameStore = (redisClient: RedisClientType) => {
+  const findGame = async (gameId: string) =>
+    (await redisClient.json.get(`gameId:${gameId}`)) as GameData | null;
+  const saveGame = async (gameId: string, gameData: GameData) => {
+    await redisClient
+      .multi()
+      .json.set(`gameId:${gameId}`, "$", gameData)
+      .expire(`gameId:${gameId}`, GAME_STORE_TTL)
+      .exec();
+  };
+  const clearGame = async (gameId: string) => {
+    await redisClient.del(`gameId:${gameId}`);
+  };
 
   return {
     findGame,
@@ -34,3 +44,30 @@ export const createGameStore = () => {
 };
 
 export type GameStore = ReturnType<typeof createGameStore>;
+
+const SESSION_TTL = 24 * 60 * 60;
+
+export type SessionData = boolean;
+
+// Private session token that shouldn't be exposed to other users
+export const createSessionStore = (redisClient: RedisClientType) => {
+  const findSession = async (sessionId: string) => redisClient.get(`sessionId:${sessionId}`);
+  const saveSession = async (sessionId: string) => {
+    await redisClient
+      .multi()
+      .set(`sessionId:${sessionId}`, "connected")
+      .expire(`sessionId:${sessionId}`, SESSION_TTL)
+      .exec();
+  };
+  const clearSession = async (sessionId: string) => {
+    await redisClient.del(`sessionId:${sessionId}`);
+  };
+
+  return {
+    findSession,
+    saveSession,
+    clearSession,
+  };
+};
+
+export type SessionStore = ReturnType<typeof createSessionStore>;
