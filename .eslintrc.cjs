@@ -65,13 +65,4 @@ module.exports = {
     "unicorn/prevent-abbreviations": "off",
     "consistent-return": "off",
   },
-  // overrides: [
-  //   // Some files require default exports
-  //   {
-  //     files: [],
-  //     rules: {
-  //       "import/no-default-export": "off",
-  //     },
-  //   },
-  // ],
 };

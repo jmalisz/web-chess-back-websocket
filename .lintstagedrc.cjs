@@ -1,3 +1,3 @@
 module.exports = {
-  "*": ["npm run lint:fix", "npm run prettify:fix"],
+  "*.{js,ts}": ["pnpm run lint:fix", "pnpm run prettify:fix"],
 };

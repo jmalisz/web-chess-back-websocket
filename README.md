@@ -44,4 +44,4 @@ Start production build:
 pnpm run start
 ```
 
-This will start local server with production build. Deployment would require more changes.
+This will start local server with production build. Deployment is automated with CI/CD.

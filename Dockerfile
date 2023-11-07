@@ -30,5 +30,6 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 
 ENV SERVICE_PATH="/api/websocket"
+ENV REDIS_DATABASE_URL="redis://back-websocket-redis-service-cluster-ip:3000"
 
 CMD [ "pnpm", "start" ]

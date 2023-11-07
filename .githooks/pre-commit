@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+set -ev
+
+pnpm exec lint-staged
+
+pnpm run typecheck
