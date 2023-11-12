@@ -1,0 +1,26 @@
+# Use Node.js from .nvmrc
+ARG NODE_VERSION
+
+# Prepare and cache pnpm
+FROM node:${NODE_VERSION} AS base
+WORKDIR /app
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+COPY package.json .
+COPY pnpm-lock.yaml .
+COPY . .
+
+# Prepare and cache dependencies
+FROM base AS dependencies
+WORKDIR /app
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --ignore-scripts --frozen-lockfile
+
+# Prepare and cache working app
+FROM base AS app
+WORKDIR /app
+ENV SERVICE_PATH="/api/websocket"
+ENV REDIS_DATABASE_URL="redis://back-websocket-redis-service-cluster-ip:3000"
+COPY --from=dependencies /app/node_modules ./node_modules
+
+CMD [ "pnpm", "dev" ]

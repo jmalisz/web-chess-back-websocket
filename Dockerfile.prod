@@ -9,8 +9,7 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 COPY package.json .
 COPY pnpm-lock.yaml .
-COPY tsconfig.json .
-COPY src ./src
+COPY . .
 
 # Prepare and cache dependencies
 FROM base AS dependencies
