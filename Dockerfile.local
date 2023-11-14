@@ -19,8 +19,10 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --ignore-scripts 
 # Prepare and cache working app
 FROM base AS app
 WORKDIR /app
+COPY --from=dependencies /app/node_modules ./node_modules
+
+ENV NODE_ENV="development"
 ENV SERVICE_PATH="/api/websocket"
 ENV REDIS_DATABASE_URL="redis://back-websocket-redis-service-cluster-ip:3000"
-COPY --from=dependencies /app/node_modules ./node_modules
 
 CMD [ "pnpm", "dev" ]
