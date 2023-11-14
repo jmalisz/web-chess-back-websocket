@@ -10,7 +10,7 @@
     "dev": "concurrently -s \"first\" -k \"pnpm:dev:*\"",
     "dev:main": "tsx watch src/app.ts | pino-pretty",
     "dev:typecheck:watch": "tsc --noEmit --watch",
-    "docker:image": "docker build -t $(bin/generate_docker_tag.sh) --build-arg NODE_VERSION=$(bin/read_node_version.sh) .",
+    "docker:image": "docker build -t $(bin/generate_docker_tag.sh) --build-arg NODE_VERSION=$(bin/read_node_version.sh) -f Dockerfile.local .",
     "docker:run": "docker run -p 3000:3000 -d --restart=always $(bin/generate_docker_tag.sh)",
     "lint": "eslint src --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --report-unused-disable-directives --max-warnings 0 --fix",
