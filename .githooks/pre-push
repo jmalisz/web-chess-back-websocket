@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 set -ev
 
-pnpm exec lint-staged
+pnpm run lint
+
+pnpm run prettify
 
 pnpm run typecheck
