@@ -14,6 +14,7 @@ export type ChatMessage = validator.infer<typeof chatMessageSchema>;
 export const gameDataSchema = validator.object({
   firstSessionId: validator.string(),
   secondSessionId: validator.string().optional(),
+  gameType: validator.enum(["human", "stockfish", "hybrid", "neural-network"]),
   // Used for saving game history to allow undo between sessions
   gamePositionPgn: validator.string(),
   // Used on client

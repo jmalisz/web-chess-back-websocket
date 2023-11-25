@@ -1,9 +1,38 @@
 import { Chess } from "chess.js";
+import { random } from "lodash-es";
 import { Socket } from "socket.io";
 
 import { validator } from "@/config/validators.js";
+import { logger } from "@/middlewares/createLogMiddleware.js";
 import { RequestError } from "@/models/RequestError.js";
-import { GameStore } from "@/websockets/stores/createGameStore.js";
+import { GameData, GameStore } from "@/websockets/stores/createGameStore.js";
+
+type HandleAgentMoveProps = {
+  socketIo: Socket;
+  chess: Chess;
+  gameId: string;
+  game: GameData;
+};
+
+// TODO: Add events for agent microservices
+const handleAgentMove = ({ socketIo, chess, game }: HandleAgentMoveProps) => {
+  logger.info(game.gameType);
+
+  const potentialMoves = chess.moves();
+  const move = potentialMoves[random(potentialMoves.length - 1)];
+
+  if (!move) throw new Error("Illegal move by agent");
+
+  chess.move(move);
+
+  if (chess.isCheckmate()) {
+    chess.reset();
+    socketIo.emit("defeat");
+  } else if (chess.isGameOver()) {
+    chess.reset();
+    socketIo.emit("draw");
+  }
+};
 
 const newGamePositionSchema = validator.object({
   gameId: validator.string(),
@@ -25,7 +54,6 @@ export const registerListenerNewGamePosition = ({
   socketIo.on("newGamePosition", async (data) => {
     const { gameId, from, to } = newGamePositionSchema.parse(data);
     const savedGameData = await gameStore.findGame(gameId);
-
     if (!savedGameData) {
       throw new RequestError({
         httpStatus: 404,
@@ -49,6 +77,11 @@ export const registerListenerNewGamePosition = ({
       chess.reset();
       socketIo.to(gameId).emit("draw");
       socketIo.emit("draw");
+    }
+
+    logger.info(chess.history().length);
+    if (chess.history().length > 0 && savedGameData.gameType !== "human") {
+      handleAgentMove({ socketIo, chess, gameId, game: savedGameData });
     }
 
     const gamePositionFen = chess.fen();

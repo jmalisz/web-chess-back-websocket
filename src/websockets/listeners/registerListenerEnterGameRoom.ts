@@ -10,13 +10,21 @@ type CreateNewGameProps = {
   chess: Chess;
   gameStore: GameStore;
   gameId: string;
+  gameType: GameData["gameType"];
 };
 
-const createNewGame = async ({ socketIo, chess, gameStore, gameId }: CreateNewGameProps) => {
+const createNewGame = async ({
+  socketIo,
+  chess,
+  gameStore,
+  gameId,
+  gameType,
+}: CreateNewGameProps) => {
   const { sessionId } = socketIo;
 
   const newGameData: GameData = {
     firstSessionId: sessionId,
+    gameType,
     gamePositionPgn: chess.pgn(),
     gamePositionFen: chess.fen(),
     chatMessages: [],
@@ -72,6 +80,7 @@ const addSecondPlayer = async ({
 
 const createGameRoomSchema = validator.object({
   gameId: validator.string(),
+  gameType: validator.enum(["human", "stockfish", "hybrid", "neural-network"]),
 });
 
 type RegisterListenerEnterGameRoomProps = {
@@ -88,21 +97,20 @@ export const registerListenerEnterGameRoom = ({
   const { sessionId } = socketIo;
 
   socketIo.on("enterGameRoom", async (data) => {
-    const { gameId } = createGameRoomSchema.parse(data);
+    const { gameId, gameType } = createGameRoomSchema.parse(data);
+    const savedGameData = await gameStore.findGame(gameId);
 
     await socketIo.join(gameId);
 
-    const savedGameData = await gameStore.findGame(gameId);
-
     if (!savedGameData) {
-      return createNewGame({ socketIo, chess, gameStore, gameId });
+      return createNewGame({ socketIo, chess, gameStore, gameId, gameType });
     }
 
     if (sessionId === savedGameData.firstSessionId || sessionId === savedGameData.secondSessionId) {
       return loadSavedGame({ socketIo, chess, savedGameData });
     }
 
-    if (!savedGameData.secondSessionId) {
+    if (savedGameData.gameType === "human" && !savedGameData.secondSessionId) {
       return addSecondPlayer({ socketIo, gameStore, savedGameData, gameId });
     }
 

@@ -25,7 +25,6 @@ export const registerListenerNewChatMessage = ({
   socketIo.on("newChatMessage", async (data) => {
     const { gameId, newChatMessage } = newChatMessageSchema.parse(data);
     const savedGameData = await gameStore.findGame(gameId);
-
     if (!savedGameData) {
       throw new RequestError({
         httpStatus: 404,

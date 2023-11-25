@@ -23,7 +23,6 @@ export const registerListenerSurrender = ({
   socketIo.on("surrender", async (data) => {
     const { gameId } = surrenderSchema.parse(data);
     const savedGameData = await gameStore.findGame(gameId);
-
     if (!savedGameData) {
       throw new RequestError({
         httpStatus: 404,
@@ -32,17 +31,8 @@ export const registerListenerSurrender = ({
         errors: [{ message: "Game not found" }],
       });
     }
-    if (!savedGameData.secondSessionId) {
-      throw new RequestError({
-        httpStatus: 409,
-        code: "WEBSOCKET",
-        subcode: "REQUEST_CONFLICT",
-        errors: [{ message: "Request conflicts with the game state" }],
-      });
-    }
 
     chess.reset();
-
     await gameStore.saveGame(gameId, {
       ...savedGameData,
       gamePositionPgn: chess.pgn(),

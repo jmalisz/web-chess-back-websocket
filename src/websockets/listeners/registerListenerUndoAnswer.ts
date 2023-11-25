@@ -24,7 +24,6 @@ export const registerListenerUndoAnswer = ({
   socketIo.on("undoAnswer", async (data) => {
     const { gameId, answer } = undoAnswerSchema.parse(data);
     const savedGameData = await gameStore.findGame(gameId);
-
     if (!savedGameData) {
       throw new RequestError({
         httpStatus: 404,
@@ -34,8 +33,9 @@ export const registerListenerUndoAnswer = ({
       });
     }
 
+    chess.loadPgn(savedGameData.gamePositionPgn);
+
     if (answer && chess.history().length > 0) {
-      chess.loadPgn(savedGameData.gamePositionPgn);
       chess.undo();
       const gamePositionFen = chess.fen();
 

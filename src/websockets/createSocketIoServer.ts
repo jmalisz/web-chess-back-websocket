@@ -62,7 +62,7 @@ export async function createSocketIoServer(app: Express) {
       registerListenerEnterGameRoom({ socketIo, chess, gameStore });
       registerListenerNewGamePosition({ socketIo, chess, gameStore });
       registerListenerSurrender({ socketIo, chess, gameStore });
-      registerListenerUndoAsk(socketIo);
+      registerListenerUndoAsk({ socketIo, chess, gameStore });
       registerListenerUndoAnswer({ socketIo, chess, gameStore });
       registerListenerNewChatMessage({ socketIo, gameStore });
     } catch (error) {
