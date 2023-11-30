@@ -64,5 +64,17 @@ module.exports = {
     // Common abbreviations are known and readable
     "unicorn/prevent-abbreviations": "off",
     "consistent-return": "off",
+    // Allow iterators
+    'no-restricted-syntax': [
+      'error',
+      {
+        selector: 'LabeledStatement',
+        message: 'Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand.',
+      },
+      {
+        selector: 'WithStatement',
+        message: '`with` is disallowed in strict mode because it makes code impossible to predict and optimize.',
+      },
+    ],
   },
 };

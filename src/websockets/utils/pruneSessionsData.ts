@@ -1,4 +1,4 @@
-import { GameData } from "@/websockets/stores/createGameStore.js";
+import { GameData } from "@/models/GameData.js";
 
 // Remove private data from GameData
 export const pruneSessionData = (

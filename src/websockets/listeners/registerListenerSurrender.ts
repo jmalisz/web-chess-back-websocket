@@ -2,8 +2,8 @@ import { Chess } from "chess.js";
 import { Socket } from "socket.io";
 
 import { validator } from "@/config/validators.js";
+import { GameStore } from "@/models/GameData.js";
 import { RequestError } from "@/models/RequestError.js";
-import { GameStore } from "@/websockets/stores/createGameStore.js";
 
 const surrenderSchema = validator.object({
   gameId: validator.string(),

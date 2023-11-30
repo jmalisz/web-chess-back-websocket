@@ -43,7 +43,7 @@ const handleLog = (
 ) => {
   logger.info({
     socketId: socketIo.id,
-    eventName: `[${type === "Emit" ? "Emit" : "Listener"}]: ${eventName}`,
+    eventName: `WebSocket [${type === "Emit" ? "Emit" : "Listener"}]: ${eventName}`,
     eventData,
   });
 };

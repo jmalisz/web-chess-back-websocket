@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { Socket } from "socket.io";
 
 import { validator } from "@/config/validators.js";
-import { createSessionStore } from "@/websockets/stores/createSessionStore.js";
+import { createSessionStore } from "@/websockets/models/Session.js";
 
 const initialHandshakeSchema = validator.object({
   sessionId: validator.string().nullable(),

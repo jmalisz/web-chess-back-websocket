@@ -14,6 +14,7 @@ export type ChatMessage = validator.infer<typeof chatMessageSchema>;
 export const gameDataSchema = validator.object({
   firstSessionId: validator.string(),
   secondSessionId: validator.string().optional(),
+  gameId: validator.string(),
   gameType: validator.enum(["human", "stockfish", "hybrid", "neural-network"]),
   // Used for saving game history to allow undo between sessions
   gamePositionPgn: validator.string(),
@@ -45,30 +46,3 @@ export const createGameStore = (redisClient: RedisClientType) => {
 };
 
 export type GameStore = ReturnType<typeof createGameStore>;
-
-const SESSION_TTL = 24 * 60 * 60;
-
-export type SessionData = boolean;
-
-// Private session token that shouldn't be exposed to other users
-export const createSessionStore = (redisClient: RedisClientType) => {
-  const findSession = async (sessionId: string) => redisClient.get(`sessionId:${sessionId}`);
-  const saveSession = async (sessionId: string) => {
-    await redisClient
-      .multi()
-      .set(`sessionId:${sessionId}`, "connected")
-      .expire(`sessionId:${sessionId}`, SESSION_TTL)
-      .exec();
-  };
-  const clearSession = async (sessionId: string) => {
-    await redisClient.del(`sessionId:${sessionId}`);
-  };
-
-  return {
-    findSession,
-    saveSession,
-    clearSession,
-  };
-};
-
-export type SessionStore = ReturnType<typeof createSessionStore>;

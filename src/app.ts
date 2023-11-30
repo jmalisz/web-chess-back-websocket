@@ -8,6 +8,7 @@ import { logger, createLogMiddleware } from "./middlewares/createLogMiddleware.j
 import { RequestError } from "./models/RequestError.js";
 import { createErrorMiddleware } from "./middlewares/createErrorMiddleware.js";
 import { createSocketIoServer } from "./websockets/createSocketIoServer.js";
+import { connectToNats } from "./events/connectToNats.js";
 
 const app = express();
 
@@ -25,7 +26,8 @@ app.all("*", () => {
 app.use(createLogMiddleware());
 app.use(createErrorMiddleware());
 
-const { httpServer } = await createSocketIoServer(app);
+const eventHandlers = await connectToNats();
+const { httpServer } = await createSocketIoServer(app, eventHandlers);
 httpServer.listen(3000, () => {
   logger.info("Express server is running at port 3000");
 });

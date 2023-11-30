@@ -1,4 +1,4 @@
-type Code = "GENERAL" | "WEBSOCKET";
+type Code = "GENERAL" | "WEBSOCKET" | "NATS";
 
 type Subcode = "INTERNAL_SERVER_ERROR" | "NOT_FOUND" | "REQUEST_CONFLICT" | "ZOD_ERROR";
 

@@ -2,7 +2,7 @@ import { Chess } from "chess.js";
 import { Socket } from "socket.io";
 
 import { validator } from "@/config/validators.js";
-import { GameData, GameStore } from "@/websockets/stores/createGameStore.js";
+import { GameData, GameStore } from "@/models/GameData.js";
 import { pruneSessionData } from "@/websockets/utils/pruneSessionsData.js";
 
 type CreateNewGameProps = {
@@ -24,6 +24,7 @@ const createNewGame = async ({
 
   const newGameData: GameData = {
     firstSessionId: sessionId,
+    gameId,
     gameType,
     gamePositionPgn: chess.pgn(),
     gamePositionFen: chess.fen(),

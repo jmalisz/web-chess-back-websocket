@@ -1,38 +1,10 @@
 import { Chess } from "chess.js";
-import { random } from "lodash-es";
 import { Socket } from "socket.io";
 
 import { validator } from "@/config/validators.js";
-import { logger } from "@/middlewares/createLogMiddleware.js";
+import { EventHandlers } from "@/events/connectToNats.js";
+import { GameStore } from "@/models/GameData.js";
 import { RequestError } from "@/models/RequestError.js";
-import { GameData, GameStore } from "@/websockets/stores/createGameStore.js";
-
-type HandleAgentMoveProps = {
-  socketIo: Socket;
-  chess: Chess;
-  gameId: string;
-  game: GameData;
-};
-
-// TODO: Add events for agent microservices
-const handleAgentMove = ({ socketIo, chess, game }: HandleAgentMoveProps) => {
-  logger.info(game.gameType);
-
-  const potentialMoves = chess.moves();
-  const move = potentialMoves[random(potentialMoves.length - 1)];
-
-  if (!move) throw new Error("Illegal move by agent");
-
-  chess.move(move);
-
-  if (chess.isCheckmate()) {
-    chess.reset();
-    socketIo.emit("defeat");
-  } else if (chess.isGameOver()) {
-    chess.reset();
-    socketIo.emit("draw");
-  }
-};
 
 const newGamePositionSchema = validator.object({
   gameId: validator.string(),
@@ -44,12 +16,14 @@ type RegisterListenerNewGamePositionProps = {
   socketIo: Socket;
   chess: Chess;
   gameStore: GameStore;
+  emitAgentMove: EventHandlers["emitAgentMove"];
 };
 
 export const registerListenerNewGamePosition = ({
   socketIo,
   chess,
   gameStore,
+  emitAgentMove,
 }: RegisterListenerNewGamePositionProps) => {
   socketIo.on("newGamePosition", async (data) => {
     const { gameId, from, to } = newGamePositionSchema.parse(data);
@@ -79,19 +53,21 @@ export const registerListenerNewGamePosition = ({
       socketIo.emit("draw");
     }
 
-    logger.info(chess.history().length);
-    if (chess.history().length > 0 && savedGameData.gameType !== "human") {
-      handleAgentMove({ socketIo, chess, gameId, game: savedGameData });
-    }
-
     const gamePositionFen = chess.fen();
+    const gamePositionPgn = chess.pgn();
+
     await gameStore.saveGame(gameId, {
       ...savedGameData,
-      gamePositionPgn: chess.pgn(),
+      gamePositionPgn,
       gamePositionFen,
     });
 
     socketIo.to(gameId).emit("newGamePosition", { gamePositionFen });
     socketIo.emit("newGamePosition", { gamePositionFen });
+
+    // Notify agent, to let it make a move
+    if (chess.history().length > 0 && savedGameData.gameType !== "human") {
+      emitAgentMove({ gameId, gameType: savedGameData.gameType, gamePositionFen, gamePositionPgn });
+    }
   });
 };

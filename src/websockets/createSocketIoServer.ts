@@ -7,7 +7,9 @@ import { createClient, RedisClientType } from "redis";
 import { Server } from "socket.io";
 
 import { REDIS_DATABASE_URL, SERVICE_PATH } from "@/config/env.js";
+import { EventHandlers } from "@/events/connectToNats.js";
 import { logger } from "@/middlewares/createLogMiddleware.js";
+import { ChatMessage, createGameStore } from "@/models/GameData.js";
 
 import { registerListenerEnterGameRoom } from "./listeners/registerListenerEnterGameRoom.js";
 import { registerListenerNewChatMessage } from "./listeners/registerListenerNewChatMessage.js";
@@ -16,9 +18,8 @@ import { registerListenerSurrender } from "./listeners/registerListenerSurrender
 import { registerListenerUndoAnswer } from "./listeners/registerListenerUndoAnswer.js";
 import { registerListenerUndoAsk } from "./listeners/registerListenerUndoAsk.js";
 import { createSocketSessionMiddleware } from "./middlewares/createSocketSessionMiddleware.js";
-import { ChatMessage, createGameStore } from "./stores/createGameStore.js";
-import { createSessionStore } from "./stores/createSessionStore.js";
-import { decorateSocketIoCommunication } from "./utils/decorateSocketCommunication.js";
+import { decorateSocketIoCommunication } from "./middlewares/decorateSocketCommunication.js";
+import { createSessionStore } from "./models/Session.js";
 
 declare module "socket.io" {
   interface Socket {
@@ -30,7 +31,7 @@ declare module "socket.io" {
   }
 }
 
-export async function createSocketIoServer(app: Express) {
+export async function createSocketIoServer(app: Express, eventEmitters: EventHandlers) {
   const httpServer = createServer(app);
   const socketIoServer = new Server(httpServer, {
     path: `${SERVICE_PATH}/socket.io`,
@@ -60,7 +61,12 @@ export async function createSocketIoServer(app: Express) {
       socketIo.emit("connected", { sessionId });
 
       registerListenerEnterGameRoom({ socketIo, chess, gameStore });
-      registerListenerNewGamePosition({ socketIo, chess, gameStore });
+      registerListenerNewGamePosition({
+        socketIo,
+        chess,
+        gameStore,
+        emitAgentMove: eventEmitters.emitAgentMove,
+      });
       registerListenerSurrender({ socketIo, chess, gameStore });
       registerListenerUndoAsk({ socketIo, chess, gameStore });
       registerListenerUndoAnswer({ socketIo, chess, gameStore });
