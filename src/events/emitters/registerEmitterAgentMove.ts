@@ -2,14 +2,13 @@ import { Codec, NatsConnection, PublishOptions } from "nats";
 
 import { GameData } from "@/models/GameData.js";
 
-const SUBJECT = "agent.emitMoveToSocket";
-
-export type EmitterAgentMovePayload = Pick<
+export type EmitterAgentCalculateMovePayload = Pick<
   GameData,
-  "gameId" | "gameType" | "gamePositionFen" | "gamePositionPgn"
+  "gameId" | "gameType" | "gamePositionPgn"
 >;
 
-export const registerEmitterAgentMove =
+export const registerEmitterAgentCalculateMove =
   (natsClient: NatsConnection, jsonCodec: Codec<Record<string, unknown>>) =>
-  (payload: EmitterAgentMovePayload, options?: PublishOptions) =>
-    natsClient.publish(SUBJECT, jsonCodec.encode(payload), options);
+  ({ gameType, ...payload }: EmitterAgentCalculateMovePayload, options?: PublishOptions) => {
+    natsClient.publish(`agent.${gameType}.calculateMove`, jsonCodec.encode(payload), options);
+  };

@@ -9,17 +9,16 @@ type RegisterEmitterNewGamePositionProps = {
   socketIo: Socket;
   chess: Chess;
   gameStore: GameStore;
-  listenAgentMove: EventHandlers["listenAgentMove"];
+  listenAgentMoveCalculated: EventHandlers["listenAgentMoveCalculated"];
 };
 
 export const registerEmitterNewGamePosition = ({
   socketIo,
   chess,
   gameStore,
-  listenAgentMove,
+  listenAgentMoveCalculated,
 }: RegisterEmitterNewGamePositionProps) => {
-  // eslint-disable-next-line no-void
-  void listenAgentMove(async (payload) => {
+  listenAgentMoveCalculated(async (payload) => {
     const { gameId, gamePositionPgn } = payload;
 
     const savedGameData = await gameStore.findGame(gameId);

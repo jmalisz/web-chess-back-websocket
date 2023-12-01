@@ -49,17 +49,16 @@ export const decorateSubscribe = (
   // eslint-disable-next-line @typescript-eslint/unbound-method
   const natsClientSubscribe = natsClient.subscribe;
 
-  // Decorate emit function with log and error wrappers
+  // Decorate subscribe function with log and error wrappers
   // eslint-disable-next-line no-param-reassign
   natsClient.subscribe = (subject, opts) => {
     try {
-      const subscription = natsClientSubscribe.apply(natsClient, [subject, opts]);
-
+      const loggingSubscription = natsClientSubscribe.apply(natsClient, [subject, opts]);
       (async () => {
         handleLog("Listener", natsClient, subject, "Start");
-        for await (const message of subscription) {
+        for await (const message of loggingSubscription) {
           handleLog("Listener", natsClient, subject, {
-            messageNumber: subscription.getProcessed(),
+            messageNumber: loggingSubscription.getProcessed(),
             ...codec.decode(message.data),
           });
         }
@@ -68,6 +67,7 @@ export const decorateSubscribe = (
         handleError(error);
       });
 
+      const subscription = natsClientSubscribe.apply(natsClient, [subject, opts]);
       return subscription;
     } catch (error: unknown) {
       handleError(error);
@@ -84,7 +84,7 @@ export const decoratePublish = (
   // eslint-disable-next-line @typescript-eslint/unbound-method
   const natsClientPublish = natsClient.publish;
 
-  // Decorate emit function with log and error wrappers
+  // Decorate publish function with log and error wrappers
   // eslint-disable-next-line no-param-reassign
   natsClient.publish = (subject, payload, options) => {
     try {

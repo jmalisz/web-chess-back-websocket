@@ -11,6 +11,7 @@ import { EventHandlers } from "@/events/connectToNats.js";
 import { logger } from "@/middlewares/createLogMiddleware.js";
 import { ChatMessage, createGameStore } from "@/models/GameData.js";
 
+import { registerEmitterNewGamePosition } from "./emitters/registerEmitterNewGamePosition.js";
 import { registerListenerEnterGameRoom } from "./listeners/registerListenerEnterGameRoom.js";
 import { registerListenerNewChatMessage } from "./listeners/registerListenerNewChatMessage.js";
 import { registerListenerNewGamePosition } from "./listeners/registerListenerNewGamePosition.js";
@@ -31,7 +32,7 @@ declare module "socket.io" {
   }
 }
 
-export async function createSocketIoServer(app: Express, eventEmitters: EventHandlers) {
+export async function createSocketIoServer(app: Express, eventHandlers: EventHandlers) {
   const httpServer = createServer(app);
   const socketIoServer = new Server(httpServer, {
     path: `${SERVICE_PATH}/socket.io`,
@@ -60,17 +61,26 @@ export async function createSocketIoServer(app: Express, eventEmitters: EventHan
       await sessionStore.saveSession(sessionId);
       socketIo.emit("connected", { sessionId });
 
+      // Listeners
       registerListenerEnterGameRoom({ socketIo, chess, gameStore });
       registerListenerNewGamePosition({
         socketIo,
         chess,
         gameStore,
-        emitAgentMove: eventEmitters.emitAgentMove,
+        emitAgentCalculateMove: eventHandlers.emitAgentCalculateMove,
       });
       registerListenerSurrender({ socketIo, chess, gameStore });
       registerListenerUndoAsk({ socketIo, chess, gameStore });
       registerListenerUndoAnswer({ socketIo, chess, gameStore });
       registerListenerNewChatMessage({ socketIo, gameStore });
+
+      // Emitters
+      registerEmitterNewGamePosition({
+        socketIo,
+        chess,
+        gameStore,
+        listenAgentMoveCalculated: eventHandlers.listenAgentMoveCalculated,
+      });
     } catch (error) {
       logger.error(error);
       socketIo.disconnect(true);

@@ -16,14 +16,14 @@ type RegisterListenerNewGamePositionProps = {
   socketIo: Socket;
   chess: Chess;
   gameStore: GameStore;
-  emitAgentMove: EventHandlers["emitAgentMove"];
+  emitAgentCalculateMove: EventHandlers["emitAgentCalculateMove"];
 };
 
 export const registerListenerNewGamePosition = ({
   socketIo,
   chess,
   gameStore,
-  emitAgentMove,
+  emitAgentCalculateMove,
 }: RegisterListenerNewGamePositionProps) => {
   socketIo.on("newGamePosition", async (data) => {
     const { gameId, from, to } = newGamePositionSchema.parse(data);
@@ -62,12 +62,19 @@ export const registerListenerNewGamePosition = ({
       gamePositionFen,
     });
 
-    socketIo.to(gameId).emit("newGamePosition", { gamePositionFen });
-    socketIo.emit("newGamePosition", { gamePositionFen });
+    if (savedGameData.gameType === "human") {
+      socketIo.to(gameId).emit("newGamePosition", { gamePositionFen });
+      socketIo.emit("newGamePosition", { gamePositionFen });
+      return;
+    }
 
     // Notify agent, to let it make a move
-    if (chess.history().length > 0 && savedGameData.gameType !== "human") {
-      emitAgentMove({ gameId, gameType: savedGameData.gameType, gamePositionFen, gamePositionPgn });
+    if (chess.history().length > 0) {
+      emitAgentCalculateMove({
+        gameId,
+        gameType: savedGameData.gameType,
+        gamePositionPgn,
+      });
     }
   });
 };
