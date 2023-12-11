@@ -1,6 +1,7 @@
 import { Codec, NatsConnection } from "nats";
 
 import { validator } from "@/config/validators.js";
+import { logger } from "@/middlewares/createLogMiddleware.js";
 import { gameDataSchema } from "@/models/GameData.js";
 
 const SUBJECT = "agent.moveCalculated";
@@ -18,14 +19,12 @@ type AgentMoveCalculatedCallback = (
   payload: ListenerAgentMoveCalculatedPayload,
 ) => Promise<void> | void;
 
-export const registerListenerAgentMoveCalculated = (
-  natsClient: NatsConnection,
-  jsonCodec: Codec<Record<string, unknown>>,
-) => {
-  const subscription = natsClient.subscribe(SUBJECT);
+export const registerListenerAgentMoveCalculated =
+  (natsClient: NatsConnection, jsonCodec: Codec<Record<string, unknown>>) =>
+  (callback: AgentMoveCalculatedCallback) => {
+    logger.info(natsClient.stats());
+    const subscription = natsClient.subscribe(SUBJECT);
 
-  return (callback: AgentMoveCalculatedCallback) => {
-    // eslint-disable-next-line no-void
     void (async () => {
       for await (const message of subscription) {
         const agentMovePayload = agentMoveCalculatedPayloadSchema.parse(
@@ -34,5 +33,6 @@ export const registerListenerAgentMoveCalculated = (
         await callback(agentMovePayload);
       }
     })();
+
+    return () => subscription.drain();
   };
-};

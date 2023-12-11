@@ -17,7 +17,7 @@ export const registerEmitterNewGamePosition = ({
   chess,
   gameStore,
   listenAgentMoveCalculated,
-}: RegisterEmitterNewGamePositionProps) => {
+}: RegisterEmitterNewGamePositionProps) =>
   listenAgentMoveCalculated(async (payload) => {
     const { gameId, gamePositionPgn } = payload;
 
@@ -51,4 +51,3 @@ export const registerEmitterNewGamePosition = ({
 
     socketIo.emit("newGamePosition", { gamePositionFen });
   });
-};

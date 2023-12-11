@@ -53,6 +53,7 @@ export const decorateSubscribe = (
   // eslint-disable-next-line no-param-reassign
   natsClient.subscribe = (subject, opts) => {
     try {
+      // Logging must be done through a second subscription because of iterators
       const loggingSubscription = natsClientSubscribe.apply(natsClient, [subject, opts]);
       (async () => {
         handleLog("Listener", natsClient, subject, "Start");
@@ -68,6 +69,9 @@ export const decorateSubscribe = (
       });
 
       const subscription = natsClientSubscribe.apply(natsClient, [subject, opts]);
+      // Cleanup logging subscription when the main one is closed
+      void subscription.closed.then(() => loggingSubscription.drain());
+
       return subscription;
     } catch (error: unknown) {
       handleError(error);

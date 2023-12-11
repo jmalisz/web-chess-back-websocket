@@ -75,11 +75,16 @@ export async function createSocketIoServer(app: Express, eventHandlers: EventHan
       registerListenerNewChatMessage({ socketIo, gameStore });
 
       // Emitters
-      registerEmitterNewGamePosition({
+      const cleanupEmitterNewGamePosition = registerEmitterNewGamePosition({
         socketIo,
         chess,
         gameStore,
         listenAgentMoveCalculated: eventHandlers.listenAgentMoveCalculated,
+      });
+
+      // Cleanup
+      socketIo.on("disconnect", () => {
+        void cleanupEmitterNewGamePosition();
       });
     } catch (error) {
       logger.error(error);
