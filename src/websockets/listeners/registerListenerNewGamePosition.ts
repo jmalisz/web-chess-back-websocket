@@ -62,12 +62,6 @@ export const registerListenerNewGamePosition = ({
       gamePositionFen,
     });
 
-    if (savedGameData.gameType === "human") {
-      socketIo.to(gameId).emit("newGamePosition", { gamePositionFen });
-      socketIo.emit("newGamePosition", { gamePositionFen });
-      return;
-    }
-
     // Notify agent, to let it make a move
     if (chess.history().length > 0) {
       emitAgentCalculateMove({
@@ -76,5 +70,8 @@ export const registerListenerNewGamePosition = ({
         gamePositionPgn,
       });
     }
+
+    socketIo.to(gameId).emit("newGamePosition", { gamePositionFen });
+    socketIo.emit("newGamePosition", { gamePositionFen });
   });
 };

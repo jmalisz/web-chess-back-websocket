@@ -1,7 +1,6 @@
 import { Codec, NatsConnection } from "nats";
 
 import { validator } from "@/config/validators.js";
-import { logger } from "@/middlewares/createLogMiddleware.js";
 import { gameDataSchema } from "@/models/GameData.js";
 
 const SUBJECT = "agent.moveCalculated";
@@ -22,7 +21,6 @@ type AgentMoveCalculatedCallback = (
 export const registerListenerAgentMoveCalculated =
   (natsClient: NatsConnection, jsonCodec: Codec<Record<string, unknown>>) =>
   (callback: AgentMoveCalculatedCallback) => {
-    logger.info(natsClient.stats());
     const subscription = natsClient.subscribe(SUBJECT);
 
     void (async () => {
