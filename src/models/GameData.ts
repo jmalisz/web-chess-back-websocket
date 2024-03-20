@@ -15,7 +15,12 @@ export const gameDataSchema = validator.object({
   firstSessionId: validator.string(),
   secondSessionId: validator.string().optional(),
   gameId: validator.string(),
-  gameType: validator.enum(["human", "stockfish", "hybrid", "neural-network"]),
+  gameType: validator.enum([
+    "human",
+    "stockfishEngineStrength",
+    "stockfishEvaluation",
+    "neuralNetwork",
+  ]),
   // Used for saving game history to allow undo between sessions
   gamePositionPgn: validator.string(),
   // Used on client

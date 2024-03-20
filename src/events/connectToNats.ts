@@ -4,7 +4,7 @@ import { NATS_URL } from "@/config/env.js";
 import { logger } from "@/middlewares/createLogMiddleware.js";
 
 import { registerEmitterAgentCalculateMove } from "./emitters/registerEmitterAgentMove.js";
-import { registerListenerAgentMoveCalculated } from "./listeners/registerListenerAgentMove.js";
+import { registerListenerMoveCalculated } from "./listeners/registerListenerMoveCalculated.js";
 import { decorateNatsCommunication } from "./middlewares/decorateNatsCommunication.js";
 
 export const jsonCodec: Codec<Record<string, unknown>> = JSONCodec();
@@ -15,7 +15,7 @@ export const connectToNats = async () => {
     decorateNatsCommunication(natsClient, jsonCodec);
 
     // Listeners
-    const listenAgentMoveCalculated = registerListenerAgentMoveCalculated(natsClient, jsonCodec);
+    const listenAgentMoveCalculated = registerListenerMoveCalculated(natsClient, jsonCodec);
 
     // Emitters
     const emitAgentCalculateMove = registerEmitterAgentCalculateMove(natsClient, jsonCodec);

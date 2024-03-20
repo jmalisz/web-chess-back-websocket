@@ -81,7 +81,12 @@ const addSecondPlayer = async ({
 
 const createGameRoomSchema = validator.object({
   gameId: validator.string(),
-  gameType: validator.enum(["human", "stockfish", "hybrid", "neural-network"]),
+  gameType: validator.enum([
+    "human",
+    "stockfishEngineStrength",
+    "stockfishEvaluation",
+    "neuralNetwork",
+  ]),
 });
 
 type RegisterListenerEnterGameRoomProps = {
