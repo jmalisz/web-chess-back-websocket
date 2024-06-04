@@ -14,6 +14,7 @@ export type ChatMessage = validator.infer<typeof chatMessageSchema>;
 export const gameDataSchema = validator.object({
   firstSessionId: validator.string(),
   secondSessionId: validator.string().optional(),
+  elo: validator.number(),
   gameId: validator.string(),
   gameType: validator.enum([
     "human",

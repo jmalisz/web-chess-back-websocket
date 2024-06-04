@@ -9,6 +9,7 @@ type CreateNewGameProps = {
   socketIo: Socket;
   chess: Chess;
   gameStore: GameStore;
+  elo: number;
   gameId: string;
   gameType: GameData["gameType"];
 };
@@ -17,6 +18,7 @@ const createNewGame = async ({
   socketIo,
   chess,
   gameStore,
+  elo,
   gameId,
   gameType,
 }: CreateNewGameProps) => {
@@ -24,6 +26,7 @@ const createNewGame = async ({
 
   const newGameData: GameData = {
     firstSessionId: sessionId,
+    elo,
     gameId,
     gameType,
     gamePositionPgn: chess.pgn(),
@@ -109,7 +112,7 @@ export const registerListenerEnterGameRoom = ({
     await socketIo.join(gameId);
 
     if (!savedGameData) {
-      return createNewGame({ socketIo, chess, gameStore, gameId, gameType });
+      return createNewGame({ socketIo, chess, gameStore, elo: 1200, gameId, gameType });
     }
 
     if (sessionId === savedGameData.firstSessionId || sessionId === savedGameData.secondSessionId) {

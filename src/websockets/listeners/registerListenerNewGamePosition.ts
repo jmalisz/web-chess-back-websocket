@@ -7,6 +7,7 @@ import { GameStore } from "@/models/GameData.js";
 import { RequestError } from "@/models/RequestError.js";
 
 const newGamePositionSchema = validator.object({
+  elo: validator.number(),
   gameId: validator.string(),
   from: validator.string(),
   to: validator.string(),
@@ -26,7 +27,7 @@ export const registerListenerNewGamePosition = ({
   emitAgentCalculateMove,
 }: RegisterListenerNewGamePositionProps) => {
   socketIo.on("newGamePosition", async (data) => {
-    const { gameId, from, to } = newGamePositionSchema.parse(data);
+    const { elo, gameId, from, to } = newGamePositionSchema.parse(data);
     const savedGameData = await gameStore.findGame(gameId);
     if (!savedGameData) {
       throw new RequestError({
@@ -58,6 +59,7 @@ export const registerListenerNewGamePosition = ({
 
     await gameStore.saveGame(gameId, {
       ...savedGameData,
+      elo,
       gamePositionPgn,
       gamePositionFen,
     });
@@ -65,6 +67,7 @@ export const registerListenerNewGamePosition = ({
     // Notify agent, to let it make a move
     if (chess.history().length > 0) {
       emitAgentCalculateMove({
+        elo,
         gameId,
         gameType: savedGameData.gameType,
         gamePositionPgn,

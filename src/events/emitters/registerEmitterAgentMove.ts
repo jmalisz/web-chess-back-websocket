@@ -4,7 +4,7 @@ import { GameData } from "@/models/GameData.js";
 
 export type EmitterAgentCalculateMovePayload = Pick<
   GameData,
-  "gameId" | "gameType" | "gamePositionPgn"
+  "elo" | "gameId" | "gameType" | "gamePositionPgn"
 >;
 
 export const registerEmitterAgentCalculateMove =
