@@ -1,5 +1,5 @@
 # Use Node.js from .nvmrc
-ARG NODE_VERSION
+ARG NODE_VERSION="18.17.0"
 
 # Prepare and cache pnpm
 FROM node:${NODE_VERSION} AS base
